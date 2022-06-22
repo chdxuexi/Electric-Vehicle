@@ -1,64 +1,64 @@
 clc;
 clear;
-%% °´µÚÒ»ÁĞÅÅĞò£¬Ñ¡Ôñµ½´ïÊ±¼ä×îĞ¡µÄÄÇÁ¾³µ½øĞĞµ÷¶È³äµç
-new_lie = sortArrayEachRow(carNum,new_lie);                         %µ÷ÓÃsortArrayEachRow£¨£©º¯Êı£¬ÏÈ¶ÔÃ¿Ò»ĞĞ·Ö±ğ½øĞĞÅÅĞò£¬²¢ÔÚÃ¿Ò»ĞĞºóÃæ¼ÓÉÏÆäÏàÓ¦µÄ³µÁ¾±àºÅ1£¬2,3....100£»
-new_lie = sortrows(new_lie);                                        %¶Ônew_lie°´ÕÕµÚÒ»ÁĞµÄ´óĞ¡£¬¶ÔÃ¿ĞĞ½øĞĞÅÅĞò
-priority = new_lie(:,pileNum+1);                                    %ÕâÑù¾ÍµÃµ½ÁËËùÓĞ³µÁ¾µ÷¶ÈË³ĞòÏÈºóµÄÊı×é
-%% ¼ÆËãÃ¿Á¾³µµ½ÄÄ¸ö³äµç×®½øĞĞ³äµç£¬½«Æä¹ØÏµ±£´æµ½ vehicle2station[]
-vehicle2pile= zeros(1,pileNum);                                     %ÁĞÊıÊÇ³äµç×®±àºÅ£¬ÖµÊÇ³µÁ¾±àºÅ£¬×î¶ÌÂ·¾¶Ëã·¨ºÍÕâÀï²»Ò»Ñù
-vehicle2pile = [vehicle2pile;new_hangCharing(carNum+1:carNum+3,1:pileNum)];%ÕâÀïÊÇ¸øvehicle2pileµÚËÄĞĞ¼ÓÉÏÁË±àºÅ1,2,3£¬....pileNum
-SumTimeOfPlies = zeros(1,pileNum);                                  %¸÷¸ö³äµç×®µÄÊ±¼äÀÛ¼Ó¾ØÕó
+%% Sort by the first column, and select the vehicle with the smallest arrival time to schedule charging
+new_lie = sortArrayEachRow(carNum,new_lie);                        
+new_lie = sortrows(new_lie);                                        
+priority = new_lie(:,pileNum+1);                                   
+%% vehicle2station[] stores the relationship between the vehicle and the pile
+vehicle2pile= zeros(1,pileNum);                                     
+vehicle2pile = [vehicle2pile;new_hangCharing(carNum+1:carNum+3,1:pileNum)];
+SumTimeOfPlies = zeros(1,pileNum);                                 
 for i=1:carNum
-    TheCar = priority(i);                                           %¸ÃÂÖÑ­»·£¬°²ÅÅµÄ³µÁ¾±àºÅ = TheCar
-    tempSingleCar = StoreEachsingleCar(:,:,TheCar);                 %¸ÃÂÖÑ­»·,¸Ã³µµÄËùÓĞĞÅÏ¢È¡³öµ½tempSingleCar
-        %ÏÈÅĞ¶ÏÔÚj×®ÊÇ·ñÓĞ³µÅÅ¶Ó
-        tempSingleCar(4,1);%ÕâÊÇ¸Ã³µTheCarÔÚÕâ¸ö×®
+    TheCar = priority(i);                                         
+    tempSingleCar = StoreEachsingleCar(:,:,TheCar);                 
+        %å…ˆåˆ¤æ–­åœ¨jæ¡©æ˜¯å¦æœ‰è½¦æ’é˜Ÿ
+        tempSingleCar(4,1);%è¿™æ˜¯è¯¥è½¦TheCaråœ¨è¿™ä¸ªæ¡©
         if SumTimeOfPlies(1,tempSingleCar(4,1)) == 0
-            %Èç¹ûÎŞ£¬Ôò°²ÅÅ³µÁ¾µ½¸Ã×®£¬²¢ĞŞ¸ÄÊ±¼äÀÛ¼Ó¾ØÕó
-            vehicle2pile(1,tempSingleCar(4,1)) = tempSingleCar(1,pileNum+1);%ÕâÀïÊÇ³µÁ¾±àºÅ=tempSingleCar(2,1)
-            SumTimeOfPlies(1,tempSingleCar(4,1)) = SumTimeOfPlies(1,tempSingleCar(4,1)) + tempSingleCar(1,1) + tempSingleCar(5,1);%ÕâÀïÊÇ¸Ã³µÔÚ¸Ã×®µÄ£¨µ½+³å£©Ê±¼ä
+            %å¦‚æœæ— ï¼Œåˆ™å®‰æ’è½¦è¾†åˆ°è¯¥æ¡©ï¼Œå¹¶ä¿®æ”¹æ—¶é—´ç´¯åŠ çŸ©é˜µ
+            vehicle2pile(1,tempSingleCar(4,1)) = tempSingleCar(1,pileNum+1);%è¿™é‡Œæ˜¯è½¦è¾†ç¼–å·=tempSingleCar(2,1)
+            SumTimeOfPlies(1,tempSingleCar(4,1)) = SumTimeOfPlies(1,tempSingleCar(4,1)) + tempSingleCar(1,1) + tempSingleCar(5,1);%è¿™é‡Œæ˜¯è¯¥è½¦åœ¨è¯¥æ¡©çš„ï¼ˆåˆ°+å†²ï¼‰æ—¶é—´
         else
-            %Èç¹ûÓĞ£¬Ôò±éÀúµ½ËùÓĞ×®µÄ´ú¼Û£¬ÕÒµ½×îĞ¡µÄÒ»¸ö°²ÅÅ³µÁ¾µ½¸Ã×®£¬²¢ĞŞ¸ÄÊ±¼äÀÛ¼Ó¾ØÕó
-            tempCost = zeros(1,pileNum);%»ñµÃ2ºÅ³µµ½ËùÓĞ³äµç×®µÄ´ú¼Û
+            %å¦‚æœæœ‰ï¼Œåˆ™éå†åˆ°æ‰€æœ‰æ¡©çš„ä»£ä»·ï¼Œæ‰¾åˆ°æœ€å°çš„ä¸€ä¸ªå®‰æ’è½¦è¾†åˆ°è¯¥æ¡©ï¼Œå¹¶ä¿®æ”¹æ—¶é—´ç´¯åŠ çŸ©é˜µ
+            tempCost = zeros(1,pileNum);%è·å¾—2å·è½¦åˆ°æ‰€æœ‰å……ç”µæ¡©çš„ä»£ä»·
             for k=1:pileNum
-                if SumTimeOfPlies(1,k) ~= 0 %Èç¹û¸Ã×®ÓĞ³µÔÚ³äµç
-                    tempCost(1,k) = SumTimeOfPlies(1,k);%¸üĞÂÔÚ¸Ã×®³äµçµÄ´ú¼Û£¬¾ÍÎªÔ­ÓĞµÄ
-                else%Èç¹ûÎŞ³µÔÚ¸Ã×®³äµç
+                if SumTimeOfPlies(1,k) ~= 0 %å¦‚æœè¯¥æ¡©æœ‰è½¦åœ¨å……ç”µ
+                    tempCost(1,k) = SumTimeOfPlies(1,k);%æ›´æ–°åœ¨è¯¥æ¡©å……ç”µçš„ä»£ä»·ï¼Œå°±ä¸ºåŸæœ‰çš„
+                else%å¦‚æœæ— è½¦åœ¨è¯¥æ¡©å……ç”µ
                     tempOfLie = find(tempSingleCar(4,:) == k);
-                    tempCost(1,k) = tempSingleCar(1,tempOfLie);%¸üĞÂÔÚ¸Ã×®³äµçµÄ´ú¼Û£¬¼´Îªµ½´ï¸Ã×®µÄÊ±¼ä£¨²»°üÀ¨³äµçÊ±¼ä£©
+                    tempCost(1,k) = tempSingleCar(1,tempOfLie);%æ›´æ–°åœ¨è¯¥æ¡©å……ç”µçš„ä»£ä»·ï¼Œå³ä¸ºåˆ°è¾¾è¯¥æ¡©çš„æ—¶é—´ï¼ˆä¸åŒ…æ‹¬å……ç”µæ—¶é—´ï¼‰
                 end
             end 
-            %´Ó´ú¼Û¾ØÕóÖĞÕÒµ½´ú¼Û×îĞ¡µÄ×® £¬½«¸Ã³µÖ¸¶¨µ½Õâ¸ö×®   
-            [C,index] = min(tempCost); %[C,I] = min(A)ÕÒµ½AÖĞÄÇĞ©×îĞ¡ÖµCµÄË÷ÒıÎ»ÖÃ£¬½«ËûÃÇ·ÅÔÚÏòÁ¿indexÖĞ·µ»Ø¡£Èç¹ûÕâÀïÓĞ¶à¸öÏàÍ¬×îĞ¡ÖµÊ±£¬·µ»ØµÄ½«ÊÇµÚÒ»¸öµÄË÷Òı¡£
-            tempPile = index(1);%tempPileÎª¸Ã³µÈ·¶¨ÔÚ¸Ã×®³äµç£¬×®µÄ±àºÅ
+            %ä»ä»£ä»·çŸ©é˜µä¸­æ‰¾åˆ°ä»£ä»·æœ€å°çš„æ¡© ï¼Œå°†è¯¥è½¦æŒ‡å®šåˆ°è¿™ä¸ªæ¡©   
+            [C,index] = min(tempCost); %[C,I] = min(A)æ‰¾åˆ°Aä¸­é‚£äº›æœ€å°å€¼Cçš„ç´¢å¼•ä½ç½®ï¼Œå°†ä»–ä»¬æ”¾åœ¨å‘é‡indexä¸­è¿”å›ã€‚å¦‚æœè¿™é‡Œæœ‰å¤šä¸ªç›¸åŒæœ€å°å€¼æ—¶ï¼Œè¿”å›çš„å°†æ˜¯ç¬¬ä¸€ä¸ªçš„ç´¢å¼•ã€‚
+            tempPile = index(1);%tempPileä¸ºè¯¥è½¦ç¡®å®šåœ¨è¯¥æ¡©å……ç”µï¼Œæ¡©çš„ç¼–å·
             if vehicle2pile(1,tempPile) == 0 
-                %Èç¹ûÎŞ
-                vehicle2pile(1,tempPile) =  tempSingleCar(1,pileNum+1);%tempSingleCar(1,pileNum+1)Îª¸Ã³µµÄ±àºÅ£»
-            else %Èç¹ûÓĞ£¬Ôò½«¸Ã³µ´æ´¢ÔÚ¸Ã×®µÄ×îºóÒ»ÁĞ
+                %å¦‚æœæ— 
+                vehicle2pile(1,tempPile) =  tempSingleCar(1,pileNum+1);%tempSingleCar(1,pileNum+1)ä¸ºè¯¥è½¦çš„ç¼–å·ï¼›
+            else %å¦‚æœæœ‰ï¼Œåˆ™å°†è¯¥è½¦å­˜å‚¨åœ¨è¯¥æ¡©çš„æœ€åä¸€åˆ—
                 [mm,nn] = size(vehicle2pile(:,tempPile));
                 if vehicle2pile(mm,tempPile) == 0
-                    vehicle2pile(mm,tempPile) =  tempSingleCar(1,pileNum+1);%tempSingleCar(1,pileNum+1)Îª¸Ã³µµÄ±àºÅ£»
+                    vehicle2pile(mm,tempPile) =  tempSingleCar(1,pileNum+1);%tempSingleCar(1,pileNum+1)ä¸ºè¯¥è½¦çš„ç¼–å·ï¼›
                 else
-                    vehicle2pile(mm+1,tempPile) =  tempSingleCar(1,pileNum+1);%tempSingleCar(1,pileNum+1)Îª¸Ã³µµÄ±àºÅ£»
+                    vehicle2pile(mm+1,tempPile) =  tempSingleCar(1,pileNum+1);%tempSingleCar(1,pileNum+1)ä¸ºè¯¥è½¦çš„ç¼–å·ï¼›
                 end
             end
-            SumTimeOfPlies(1,tempPile) = SumTimeOfPlies(1,tempPile) + tempSingleCar(1,tempPile) + tempSingleCar(5,tempPile);%¸üĞÂ´ú¼Û¾ØÕóÎªÔ­ÓĞ¾ØÕó½ÓÊÕ¸Ã³µ³äµçµÄ×®+¸Ã³µµ½´ï+¸Ã³µ³äµç
+            SumTimeOfPlies(1,tempPile) = SumTimeOfPlies(1,tempPile) + tempSingleCar(1,tempPile) + tempSingleCar(5,tempPile);%æ›´æ–°ä»£ä»·çŸ©é˜µä¸ºåŸæœ‰çŸ©é˜µæ¥æ”¶è¯¥è½¦å……ç”µçš„æ¡©+è¯¥è½¦åˆ°è¾¾+è¯¥è½¦å……ç”µ
         end
 end
-%% ¿ÉÊÓ»¯Ã¿¸ö³äµç×®ÓĞ¶àÉÙ³µÔÚÕâÀï³äµç
+%% å¯è§†åŒ–æ¯ä¸ªå……ç”µæ¡©æœ‰å¤šå°‘è½¦åœ¨è¿™é‡Œå……ç”µ
 for i=1:pileNum
-    if vehicle2pile(1,i) == 0%Èç¹ûÕâ¸öÊıÎªÁã£¬ËµÃ÷¸Ã×®ÎŞ³µ³äµç,ËùÒÔÌø¹ı¸Ã×®
+    if vehicle2pile(1,i) == 0%å¦‚æœè¿™ä¸ªæ•°ä¸ºé›¶ï¼Œè¯´æ˜è¯¥æ¡©æ— è½¦å……ç”µ,æ‰€ä»¥è·³è¿‡è¯¥æ¡©
         continue;
     end
     vehicle2pile(1,i);
     carInitPosition(vehicle2pile(1,i));
-    fprintf("µÚ %3d Á¾ÔÚ½Úµã %3d£¬µ½³äµçÕ¾ %3d µÄ %3d ºÅ×®³äµç\n",vehicle2pile(1,i),carInitPosition(vehicle2pile(1,i)),vehicle2pile(2,i),vehicle2pile(4,i));
+    fprintf("ç¬¬ %3d è¾†åœ¨èŠ‚ç‚¹ %3dï¼Œåˆ°å……ç”µç«™ %3d çš„ %3d å·æ¡©å……ç”µ\n",vehicle2pile(1,i),carInitPosition(vehicle2pile(1,i)),vehicle2pile(2,i),vehicle2pile(4,i));
 end
-%% ÓÉvehicle2pile£¬½«ÄÄĞ©³µÔÚÄÄĞ©³äµçÕ¾³äµçµÄ¹ØÏµ±£´æµ½vehicle2station
+%% ç”±vehicle2pileï¼Œå°†å“ªäº›è½¦åœ¨å“ªäº›å……ç”µç«™å……ç”µçš„å…³ç³»ä¿å­˜åˆ°vehicle2station
 vehicle2station = zeros(1,carNum);
 for i=1:pileNum
     fprintf('i=%3d',i)
-    if vehicle2pile(1,i) == 0%Èç¹ûÕâ¸öÊıÎªÁã£¬ËµÃ÷¸Ã×®ÎŞ³µ³äµç,ËùÒÔÌø¹ı¸Ã×®
+    if vehicle2pile(1,i) == 0%å¦‚æœè¿™ä¸ªæ•°ä¸ºé›¶ï¼Œè¯´æ˜è¯¥æ¡©æ— è½¦å……ç”µ,æ‰€ä»¥è·³è¿‡è¯¥æ¡©
         continue;
     end
     vehicle2pile(1,i);
@@ -74,21 +74,21 @@ for i=1:pileNum
     end
 end
 
-%% ¿ÉÊÓ»¯Ã¿¸ö³äµçÕ¾ÓĞ¶àÉÙ³µÔÚÕâÀï³äµç
-pileStationNum = [9 13 20 30 33 35 38 42 47 58 60 62 63 66 75 80 84];%³äµç×®µÄ±àºÅÇé¿ö£º
-pileStationNumValue = [2 9 22 21 2 13 6 8 5 9 3 51 7 12 6 28 18];%³äµç×®µÄ±àºÅÇé¿ö£º
+%% å¯è§†åŒ–æ¯ä¸ªå……ç”µç«™æœ‰å¤šå°‘è½¦åœ¨è¿™é‡Œå……ç”µ
+pileStationNum = [9 13 20 30 33 35 38 42 47 58 60 62 63 66 75 80 84];%å……ç”µæ¡©çš„ç¼–å·æƒ…å†µï¼š
+pileStationNumValue = [2 9 22 21 2 13 6 8 5 9 3 51 7 12 6 28 18];%å……ç”µæ¡©çš„ç¼–å·æƒ…å†µï¼š
 stationNum = 17;
 for i=1:stationNum
-    pile = pileStationNum(i);%³äµçÕ¾ĞòºÅ
-    pileValue = pileStationNumValue(i);%¸Ã³äµçÕ¾³äµç×®ÊıÄ¿
+    pile = pileStationNum(i);%å……ç”µç«™åºå·
+    pileValue = pileStationNumValue(i);%è¯¥å……ç”µç«™å……ç”µæ¡©æ•°ç›®
     sum1 = length(find(vehicle2station==pile));
-    fprintf('\n ³äµçÕ¾ %3d ÓĞ%3d¸ö×®£»  %3d Á¾³µÔÚÕâ³äµç',pile,pileValue,sum1);
+    fprintf('\n å……ç”µç«™ %3d æœ‰%3dä¸ªæ¡©ï¼›  %3d è¾†è½¦åœ¨è¿™å……ç”µ',pile,pileValue,sum1);
 end
-%% ¼ÆËãËùÓĞ³µµÄ×Ü³äµçÊ±¼ä           
-za = unique(vehicle2station);%za±£´æµÄÊÇ³äµçÕ¾µÄĞòºÅ£¬ÇÒ³äµçÕ¾ÓĞ³µÁ¾½øĞĞ³äµç
+%% è®¡ç®—æ‰€æœ‰è½¦çš„æ€»å……ç”µæ—¶é—´           
+za = unique(vehicle2station);%zaä¿å­˜çš„æ˜¯å……ç”µç«™çš„åºå·ï¼Œä¸”å……ç”µç«™æœ‰è½¦è¾†è¿›è¡Œå……ç”µ
 station_pile = [0,0,0,0,0,0,0,0,2,0,0,0,9,0,0,0,0,0,0,22,0,0,0,0,0,0,0,0,0,21,0,0,2,0,13,0,0,6,0,0,0,8,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,9,0,3,0,51,7,0,0,12,0,0,0,0,0,0,0,0,6,0,0,0,0,28,0,0,0,18,0,0,0,0,0,0];
-            %³äµçÕ¾ºÍ³äµç×®µÄ¶ÔÓ¦¹ØÏµ/ÉÏÃæÎª³äµçÕ¾£ºÏÂÃæ¶ÔÓ¦µÄ³äµç×®µÄ¸öÊı
-T = 0; %×ÜµÄÏûºÄµÄËùÓĞÊ±¼ä 
+            %å……ç”µç«™å’Œå……ç”µæ¡©çš„å¯¹åº”å…³ç³»/ä¸Šé¢ä¸ºå……ç”µç«™ï¼šä¸‹é¢å¯¹åº”çš„å……ç”µæ¡©çš„ä¸ªæ•°
+T = 0; %æ€»çš„æ¶ˆè€—çš„æ‰€æœ‰æ—¶é—´ 
 EST_car_wait = zeros(1,carNum); 
 EST_car_arrive = zeros(1,carNum); 
 EST_car_charge = zeros(1,carNum); 
@@ -102,21 +102,21 @@ for i=1:length(za)
             EST_car_charge(1,zmvv(j)) = EV_charging_time(zmvv(j),zai);
         end
     else
-        %ÅÅ¶Ó
+        %æ’é˜Ÿ
         medium_car_arrive = [];
         medium_car_charging = [];
         for j=1:length(zmvv)
-             fprintf("\nµÚ %3d Á¾³µÔÚ³äµçÕ¾ %3d ³äµç ¸Ã³µÁ¾ÔÚ³äµçÕ¾±àºÅÎª£º%3d \n" ,zmvv(j),zai,carInitPosition(zmvv(j)))
+             fprintf("\nç¬¬ %3d è¾†è½¦åœ¨å……ç”µç«™ %3d å……ç”µ è¯¥è½¦è¾†åœ¨å……ç”µç«™ç¼–å·ä¸ºï¼š%3d \n" ,zmvv(j),zai,carInitPosition(zmvv(j)))
             medium_car_arrive = [medium_car_arrive,EV_arrive_time(zmvv(j),zai)];
             medium_car_charging = [medium_car_charging,EV_charging_time(zmvv(j),zai)];
         end
         for j=1:length(zmvv)
             medium_car_arrive(2,j) = zmvv(j);
-            EST_car_arrive(1,zmvv(j)) = medium_car_arrive(1,j);%±£´æ¸Ã³µµÄµ½´ïÊ±¼ä
+            EST_car_arrive(1,zmvv(j)) = medium_car_arrive(1,j);%ä¿å­˜è¯¥è½¦çš„åˆ°è¾¾æ—¶é—´
             medium_car_charging(2,j) = zmvv(j);
-            EST_car_charge(1,zmvv(j)) = medium_car_charging(1,j);%±£´æ¸Ã³µµÄ³äµçÊ±¼ä
+            EST_car_charge(1,zmvv(j)) = medium_car_charging(1,j);%ä¿å­˜è¯¥è½¦çš„å……ç”µæ—¶é—´
         end
-        %µ½´ïÊ±¼ä½øĞĞÅÅĞò
+        %åˆ°è¾¾æ—¶é—´è¿›è¡Œæ’åº
         for ii=1:length(medium_car_arrive)
             for jj=1:length(medium_car_arrive)-ii
                 if(medium_car_arrive(jj)>medium_car_arrive(jj+1))
@@ -134,5 +134,5 @@ for i=1:length(za)
         end
     end
 end
-fprintf('\nNEW_EST×îÔç¿ªÊ¼³äµç²ßÂÔµ÷¶È×ÜµÄÊ±¼äÊÇ: %d Ğ¡Ê±\n\n',T)
-fprintf('\n×ÜµÄÊ±¼äÊÇ: %d Ğ¡Ê±\n\n',sum(EST_car_arrive+EST_car_charge+EST_car_wait));
+fprintf('\nNEW_ESTæœ€æ—©å¼€å§‹å……ç”µç­–ç•¥è°ƒåº¦æ€»çš„æ—¶é—´æ˜¯: %d å°æ—¶\n\n',T)
+fprintf('\næ€»çš„æ—¶é—´æ˜¯: %d å°æ—¶\n\n',sum(EST_car_arrive+EST_car_charge+EST_car_wait));
