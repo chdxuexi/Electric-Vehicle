@@ -11,54 +11,54 @@ SumTimeOfPlies = zeros(1,pileNum);
 for i=1:carNum
     TheCar = priority(i);                                         
     tempSingleCar = StoreEachsingleCar(:,:,TheCar);                 
-        %先判断在j桩是否有车排队
-        tempSingleCar(4,1);%这是该车TheCar在这个桩
+        %First determine whether there is a vehicle queue at the CPj 
+        tempSingleCar(4,1);    
         if SumTimeOfPlies(1,tempSingleCar(4,1)) == 0
-            %如果无，则安排车辆到该桩，并修改时间累加矩阵
-            vehicle2pile(1,tempSingleCar(4,1)) = tempSingleCar(1,pileNum+1);%这里是车辆编号=tempSingleCar(2,1)
-            SumTimeOfPlies(1,tempSingleCar(4,1)) = SumTimeOfPlies(1,tempSingleCar(4,1)) + tempSingleCar(1,1) + tempSingleCar(5,1);%这里是该车在该桩的（到+冲）时间
+            %If none, arrange the vehicle to the pile
+            vehicle2pile(1,tempSingleCar(4,1)) = tempSingleCar(1,pileNum+1);  %tempSingleCar(2,1) is the EVi’id
+            SumTimeOfPlies(1,tempSingleCar(4,1)) = SumTimeOfPlies(1,tempSingleCar(4,1)) + tempSingleCar(1,1) + tempSingleCar(5,1); %charging time+arrive time
         else
-            %如果有，则遍历到所有桩的代价，找到最小的一个安排车辆到该桩，并修改时间累加矩阵
-            tempCost = zeros(1,pileNum);%获得2号车到所有充电桩的代价
+            %If there is, traverse to the cost of all piles, find the shortest time, and arrange the vehicle to the pile
+            tempCost = zeros(1,pileNum);  
             for k=1:pileNum
-                if SumTimeOfPlies(1,k) ~= 0 %如果该桩有车在充电
-                    tempCost(1,k) = SumTimeOfPlies(1,k);%更新在该桩充电的代价，就为原有的
-                else%如果无车在该桩充电
+                if SumTimeOfPlies(1,k) ~= 0   %If the pile has a vehicle charging
+                    tempCost(1,k) = SumTimeOfPlies(1,k);   
+                else   %If no vehicle is charging at the pile
                     tempOfLie = find(tempSingleCar(4,:) == k);
-                    tempCost(1,k) = tempSingleCar(1,tempOfLie);%更新在该桩充电的代价，即为到达该桩的时间（不包括充电时间）
+                    tempCost(1,k) = tempSingleCar(1,tempOfLie); 
                 end
             end 
-            %从代价矩阵中找到代价最小的桩 ，将该车指定到这个桩   
-            [C,index] = min(tempCost); %[C,I] = min(A)找到A中那些最小值C的索引位置，将他们放在向量index中返回。如果这里有多个相同最小值时，返回的将是第一个的索引。
-            tempPile = index(1);%tempPile为该车确定在该桩充电，桩的编号
+            %Find the pile with the shortest time cost and assign the vehicle to this pile   
+            [C,index] = min(tempCost);   
+            tempPile = index(1);   %tempPile is the CPj’s id
             if vehicle2pile(1,tempPile) == 0 
-                %如果无
-                vehicle2pile(1,tempPile) =  tempSingleCar(1,pileNum+1);%tempSingleCar(1,pileNum+1)为该车的编号；
-            else %如果有，则将该车存储在该桩的最后一列
+                % if no
+                vehicle2pile(1,tempPile) =  tempSingleCar(1,pileNum+1); %tempSingleCar(1,pileNum+1) is the EVi’s id；
+            else % If there is, store the vehicle in the last column of the pile
                 [mm,nn] = size(vehicle2pile(:,tempPile));
                 if vehicle2pile(mm,tempPile) == 0
-                    vehicle2pile(mm,tempPile) =  tempSingleCar(1,pileNum+1);%tempSingleCar(1,pileNum+1)为该车的编号；
+                    vehicle2pile(mm,tempPile) =  tempSingleCar(1,pileNum+1); 
                 else
-                    vehicle2pile(mm+1,tempPile) =  tempSingleCar(1,pileNum+1);%tempSingleCar(1,pileNum+1)为该车的编号；
+                    vehicle2pile(mm+1,tempPile) =  tempSingleCar(1,pileNum+1);
                 end
             end
-            SumTimeOfPlies(1,tempPile) = SumTimeOfPlies(1,tempPile) + tempSingleCar(1,tempPile) + tempSingleCar(5,tempPile);%更新代价矩阵为原有矩阵接收该车充电的桩+该车到达+该车充电
+            SumTimeOfPlies(1,tempPile) = SumTimeOfPlies(1,tempPile) + tempSingleCar(1,tempPile) + tempSingleCar(5,tempPile);
         end
 end
-%% 可视化每个充电桩有多少车在这里充电
+%% Visualize how many vehicles are charging here at each charging pile
 for i=1:pileNum
-    if vehicle2pile(1,i) == 0%如果这个数为零，说明该桩无车充电,所以跳过该桩
+    if vehicle2pile(1,i) == 0 
         continue;
     end
     vehicle2pile(1,i);
     carInitPosition(vehicle2pile(1,i));
     fprintf("第 %3d 辆在节点 %3d，到充电站 %3d 的 %3d 号桩充电\n",vehicle2pile(1,i),carInitPosition(vehicle2pile(1,i)),vehicle2pile(2,i),vehicle2pile(4,i));
 end
-%% 由vehicle2pile，将哪些车在哪些充电站充电的关系保存到vehicle2station
+%% vehicle2station[] stores the relationship between the vehicle and the pile
 vehicle2station = zeros(1,carNum);
 for i=1:pileNum
     fprintf('i=%3d',i)
-    if vehicle2pile(1,i) == 0%如果这个数为零，说明该桩无车充电,所以跳过该桩
+    if vehicle2pile(1,i) == 0  
         continue;
     end
     vehicle2pile(1,i);
@@ -74,21 +74,21 @@ for i=1:pileNum
     end
 end
 
-%% 可视化每个充电站有多少车在这里充电
-pileStationNum = [9 13 20 30 33 35 38 42 47 58 60 62 63 66 75 80 84];%充电桩的编号情况：
-pileStationNumValue = [2 9 22 21 2 13 6 8 5 9 3 51 7 12 6 28 18];%充电桩的编号情况：
+%% Visualize how many vehicles are charging here at each charging station
+pileStationNum = [9 13 20 30 33 35 38 42 47 58 60 62 63 66 75 80 84]; %Number of charging pile nodes in the road network
+pileStationNumValue = [2 9 22 21 2 13 6 8 5 9 3 51 7 12 6 28 18]; %the number of each charging pile
 stationNum = 17;
 for i=1:stationNum
-    pile = pileStationNum(i);%充电站序号
-    pileValue = pileStationNumValue(i);%该充电站充电桩数目
+    pile = pileStationNum(i); 
+    pileValue = pileStationNumValue(i);
     sum1 = length(find(vehicle2station==pile));
     fprintf('\n 充电站 %3d 有%3d个桩；  %3d 辆车在这充电',pile,pileValue,sum1);
 end
-%% 计算所有车的总充电时间           
-za = unique(vehicle2station);%za保存的是充电站的序号，且充电站有车辆进行充电
+%% Calculate the total charging time for all cars           
+za = unique(vehicle2station);  
 station_pile = [0,0,0,0,0,0,0,0,2,0,0,0,9,0,0,0,0,0,0,22,0,0,0,0,0,0,0,0,0,21,0,0,2,0,13,0,0,6,0,0,0,8,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,9,0,3,0,51,7,0,0,12,0,0,0,0,0,0,0,0,6,0,0,0,0,28,0,0,0,18,0,0,0,0,0,0];
-            %充电站和充电桩的对应关系/上面为充电站：下面对应的充电桩的个数
-T = 0; %总的消耗的所有时间 
+            
+T = 0; %total charging time 
 EST_car_wait = zeros(1,carNum); 
 EST_car_arrive = zeros(1,carNum); 
 EST_car_charge = zeros(1,carNum); 
@@ -102,7 +102,7 @@ for i=1:length(za)
             EST_car_charge(1,zmvv(j)) = EV_charging_time(zmvv(j),zai);
         end
     else
-        %排队
+        %waiting
         medium_car_arrive = [];
         medium_car_charging = [];
         for j=1:length(zmvv)
@@ -112,11 +112,11 @@ for i=1:length(za)
         end
         for j=1:length(zmvv)
             medium_car_arrive(2,j) = zmvv(j);
-            EST_car_arrive(1,zmvv(j)) = medium_car_arrive(1,j);%保存该车的到达时间
+            EST_car_arrive(1,zmvv(j)) = medium_car_arrive(1,j); %arrive time
             medium_car_charging(2,j) = zmvv(j);
-            EST_car_charge(1,zmvv(j)) = medium_car_charging(1,j);%保存该车的充电时间
+            EST_car_charge(1,zmvv(j)) = medium_car_charging(1,j); %charging time
         end
-        %到达时间进行排序
+        %sort the arrive time
         for ii=1:length(medium_car_arrive)
             for jj=1:length(medium_car_arrive)-ii
                 if(medium_car_arrive(jj)>medium_car_arrive(jj+1))
