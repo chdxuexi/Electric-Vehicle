@@ -1,61 +1,59 @@
-%% Ö÷º¯ÊıTSLPSO_5  100³µ¸Ä600³µ
 function [record,fym]=TSLPSO_5()
 clc;
 clear;
 close all;
-%% ³õÊ¼»¯ÖÖÈºµÄ²ÎÊıÉèÖÃ
+%% Initialize the parameter settings of the population
 carNum = 600;
-d = carNum;                      % 600Á¾³µ£¬600Î¬
-pileNum = 222;                   % 222¸ö³äµç×®
-N = 150;                         % ³õÊ¼ÖÖÈº¸öÊı£¨Ã¿¸öÁ£×Ó¶¼ÊÇÒ»¸öµ÷¶È·½°¸£©
-ger = 300;                       % ×î´óµü´ú´ÎÊı
-Wmax=0.9;                        %¹ßĞÔÈ¨ÖØ×î´óÖµ
-Wmin=0.4;                        %¹ßĞÔÈ¨ÖØ×îĞ¡Öµ
-c_2 = 1.49;                       % ×ÔÎÒÑ§Ï°Òò×Ó
-c_3 = 1.49;                       % ÈºÌåÑ§Ï°Òò×Ó
-[EV_arrive_time,EV_charging_time] = DataSource; %´«¹ıÀ´³µÁ¾¡¢³äµç×®µÄÊ±¼äÊı¾İ
-% ³õÊ¼»¯ËÙ¶Èv x
-xmin = 1;                  % ÉèÖÃÎ»ÖÃ²ÎÊıÏŞÖÆ(¾ØÕóµÄĞÎÊ½¿ÉÒÔ¶àÎ¬)
+d = carNum;                      % 600 vehicles, 600 dimensions
+pileNum = 222;                   % 222 charging piles
+N = 150;                         % initial population
+ger = 300;                       % iterations
+Wmax=0.9;                        
+Wmin=0.4;                        
+c_2 = 1.49;                       % cognitive coefficient
+c_3 = 1.49;                       % social coefficient
+[EV_arrive_time,EV_charging_time] = DataSource; 
+% initial velocity and location
+xmin = 1;                  
 xmax = pileNum;
-vmin = -10;                % ÉèÖÃËÙ¶ÈÏŞÖÆ
+vmin = -10;                
 vmax = 10;
 for i0=1:N
     for j0 = 1:d
-        x(i0,j0) = xmin + (xmax - xmin) * rand; %³õÊ¼ÖÖÈºµÄÎ»ÖÃ
-        v(i0,j0) = xmin + (xmax - xmin) * rand; %³õÊ¼ÖÖÈºµÄËÙ¶È
+        x(i0,j0) = xmin + (xmax - xmin) * rand; 
+        v(i0,j0) = xmin + (xmax - xmin) * rand; 
     end
 end
-x = round(x);                    % ¶Ô³õÊ¼ÖÖÈºµÄÎ»ÖÃ½øĞĞÈ¡Õû£¬ËÄÉáÎåÈë
-syd = [];                        %Ã¿Ò»¸öÁ£×ÓµÄÊÊÓ¦¶ÈÖµ
-for i=1:N                        %NÎªÖÖÈº¸öÊı
+x = round(x);                    % round the position of the initial population
+syd = [];                       
+for i=1:N                        
     DX=x(i,:);
-    T=Car_Fitness(DX,N,EV_arrive_time,EV_charging_time);    %µ÷ÓÃº¯Êı£¬¼ÆËãÊÊÓ¦¶ÈÖµ
+    T=Car_Fitness(DX,N,EV_arrive_time,EV_charging_time);    
     syd=[syd,T];
 end
-fx = syd;                        % µ±Ç°´úÊı£¬N¸öÁ£×ÓµÄÊÊÓ¦¶ÈÖµ
-xm = x;                          % Ã¿¸ö¸öÌåµÄÀúÊ·×î¼ÑÎ»ÖÃ
-ym = zeros(1, d);                % ÖÖÈºµÄÀúÊ·×î¼ÑÎ»ÖÃ
-fxm = zeros(N, 1);               % Ã¿¸ö¸öÌåµÄÀúÊ·×î¼ÑÊÊÓ¦¶È
-fym = inf;                       % ÖÖÈºÀúÊ·×î¼ÑÊÊÓ¦¶È
-for i = 1:N                      % N = 150 ÖÖÈº¸öÊı
-    fxm(i) = fx(i);     % ¸üĞÂ¸öÌåÀúÊ·×î¼ÑÊÊÓ¦¶È
-    xm(i,:) = x(i,:);   % ¸üĞÂ¸öÌåÀúÊ·×î¼ÑÎ»ÖÃ
+fx = syd;                        % fitness value of N particles
+xm = x;                          % pbest
+ym = zeros(1, d);                % gbest
+fxm = zeros(N, 1);               % f(pbest)
+fym = inf;                       % f(gbest)
+for i = 1:N                      
+    fxm(i) = fx(i);     % update f(pbest)
+    xm(i,:) = x(i,:);   % update pbest
 end
-if fym > min(fxm)             %fymµÄ³õÊ¼Öµ=inf
-    [fym, nmax] = min(fxm);   % ¸üĞÂÈºÌåÀúÊ·×î¼ÑÊÊÓ¦¶È
-    ym = xm(nmax, :);         % ¸üĞÂÈºÌåÀúÊ·×î¼ÑÎ»ÖÃ
+if fym > min(fxm)            
+    [fym, nmax] = min(fxm);   % update f(gbest)
+    ym = xm(nmax, :);         % update gbest
 end
 
-%% ½øÈëÑ­»·
+%% enter the loop
 iter = 1;
-xdl=xm;%¸ü»»¾Ö²¿×îÓÅÖµ
+xdl=xm; 
 record = zeros(ger, 1); 
-while iter <= ger % gerµü´ú´ÎÊı
-    %¶ÔÖÖÈº1
+while iter <= ger  
     c_1 = Wmax-(Wmax-Wmin)*(iter/ger)^2;
     for i = 1:N
     v(i,:) =  c_1*v(i,:)+c_2 * rand *(xdl(i,:) - x(i,:)) + c_3 * rand *(ym - x(i,:));     
-    % ±ß½çËÙ¶È´¦Àí
+    % Boundary Velocity Handling
         for j=1:d
                 if  v(i,j)>vmax
                     v(i,j)=vmax;
@@ -65,9 +63,9 @@ while iter <= ger % gerµü´ú´ÎÊı
                 end
         end
         v = round(v);
-        % Î»ÖÃ¸üĞÂ
+        % update location 
         x(i,:) = x(i,:) + v(i,:);
-        % ±ß½çÎ»ÖÃ´¦Àí
+        % Boundary location handling
         for j=1:d
                 if  x(i,j)>xmax
                     x(i,j)=xmax;
@@ -76,18 +74,18 @@ while iter <= ger % gerµü´ú´ÎÊı
                     x(i,j)=xmin;
                 end
         end       
-        %ÊÊÓ¦¶È¼ÆËã
+        %Calculate fitness
         DX=x(i,:);
-        fx(i)=Car_Fitness(DX,N,EV_arrive_time,EV_charging_time);%µ÷ÓÃº¯Êı£¬¼ÆËãÊÊÓ¦¶ÈÖµ   
+        fx(i)=Car_Fitness(DX,N,EV_arrive_time,EV_charging_time); 
         if fx(i)<fxm(i)
-            fxm(i) = fx(i);     % ¸üĞÂ¸öÌåÀúÊ·×î¼ÑÊÊÓ¦¶È
-            xm(i,:) = x(i,:);   % ¸üĞÂ¸öÌåÀúÊ·×î¼ÑÎ»ÖÃ
+            fxm(i) = fx(i);     
+            xm(i,:) = x(i,:);   
             flag(i)=1;
         else
             flag(i)=0;
         end
         if flag(i)==1
-            %Ëã·¨2¿ªÊ¼£»»³ÒÉ·µ»ØxdlµÄÖµ
+            % learning particle
             xdl(i,:)=xm(i,:);
             for j=1:d
                 temp=xdl(i,:);
@@ -100,25 +98,25 @@ while iter <= ger % gerµü´ú´ÎÊı
                 if temp_f<xdl_f
                     xdl(i,j)=ym(j);
                 end
-            end%Ëã·¨2½áÊø
+            end
         end
     end    
-    %¸üĞÂÈ«¾Ö×îÓÅ½â
-    if fym > min(fxm)           %fymµÄ³õÊ¼Öµ=inf
-        [fym, nmax] = min(fxm);   % ¸üĞÂÈºÌåÀúÊ·×î¼ÑÊÊÓ¦¶È
-        ym = xm(nmax, :);      % ¸üĞÂÈºÌåÀúÊ·×î¼ÑÎ»ÖÃ
+    % Update the global optimal solution
+    if fym > min(fxm)           
+        [fym, nmax] = min(fxm);   
+        ym = xm(nmax, :);      
     end
-    record(iter) = fym;%×îĞ¡Öµ¼ÇÂ¼
+    record(iter) = fym;  
     iter = iter+1;
 end
 
-%% ½á¹ûÊä³ö
+%% conclusion
 figure(1)
 plot(record);
 xlabel('Number of iterations') ;
 ylabel('Fitness value') ;
-% title('ÊÊÓ¦¶È½ø»¯ÇúÏß');
+% title('é€‚åº”åº¦è¿›åŒ–æ›²çº¿');
 
-disp(['×îĞ¡ºÄÊ±£º',num2str(fym)]);
-disp(['³µÁ¾µ÷¶È½á¹û£º',num2str(ym)]);
+disp(['æœ€å°è€—æ—¶ï¼š',num2str(fym)]);
+disp(['è½¦è¾†è°ƒåº¦ç»“æœï¼š',num2str(ym)]);
 end
