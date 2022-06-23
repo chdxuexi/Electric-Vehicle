@@ -2,68 +2,68 @@ function [record,fym]=PSO_Car_3_13()
 clc;
 clear;
 close all;
-%% ³õÊ¼»¯ÖÖÈºµÄ²ÎÊıÉèÖÃ
-tic;%¼ÆÊ±ÓÃ
+%% Initialize the parameter settings of the population
+tic;%è®¡æ—¶ç”¨
 carNum = 1200;
-d = carNum;                      % 100Á¾³µ£¬100Î¬
-pileNum = 222;                   % 222¸ö³äµç×®
-N = 150;                         % ³õÊ¼ÖÖÈº¸öÊı£¨Ã¿¸öÁ£×Ó¶¼ÊÇÒ»¸öµ÷¶È·½°¸£©
-ger = 300;                       % ×î´óµü´ú´ÎÊı
-[EV_arrive_time,EV_charging_time] = DataSource;   %´«¹ıÀ´³µÁ¾¡¢³äµç×®µÄÊ±¼äÊı¾İ
-Wmax=0.9;                        %¹ßĞÔÈ¨ÖØ×î´óÖµ
-Wmin=0.4;                        %¹ßĞÔÈ¨ÖØ×îĞ¡Öµ
-xlimit = [1, pileNum];           % ÉèÖÃÎ»ÖÃ²ÎÊıÏŞÖÆ(¾ØÕóµÄĞÎÊ½¿ÉÒÔ¶àÎ¬)
+d = carNum;                      % 100 vehicles, 100 dimensions
+pileNum = 222;                   % 222 charging piles
+N = 150;                         % initial population
+ger = 300;                       % iterations
+[EV_arrive_time,EV_charging_time] = DataSource;   % Data of vehicles and charging piles
+Wmax=0.9;                        
+Wmin=0.4;                       
+xlimit = [1, pileNum];           % Set positional parameter limits
 xlimit = repmat(xlimit,d,1);
-vlimit = [-10, 10];              % ÉèÖÃËÙ¶ÈÏŞÖÆ
+vlimit = [-10, 10];              % set velocity limit
 vlimit = repmat(vlimit,d,1);
-c_2 = 1.49;                      % ×ÔÎÒÑ§Ï°Òò×Ó
-c_3 = 1.49;                      % ÈºÌåÑ§Ï°Òò×Ó
+c_2 = 1.49;                      % cognitive coefficient
+c_3 = 1.49;                      % social coefficient
 for i = 1:d
-    x = xlimit(i, 1) + (xlimit(i, 2) - xlimit(i, 1)) * rand(N, d);    %³õÊ¼ÖÖÈºµÄÎ»ÖÃ
+    x = xlimit(i, 1) + (xlimit(i, 2) - xlimit(i, 1)) * rand(N, d);    % The location of the initial population
 end
-x = round(x);                    % ¶Ô³õÊ¼ÖÖÈºµÄÎ»ÖÃ½øĞĞÈ¡Õû£¬ËÄÉáÎåÈë
-v = rand(N, d);                  % ³õÊ¼ÖÖÈºµÄËÙ¶È
-xm = x;                          % Ã¿¸ö¸öÌåµÄÀúÊ·×î¼ÑÎ»ÖÃ
-ym = zeros(1, d);                % ÖÖÈºµÄÀúÊ·×î¼ÑÎ»ÖÃ
-fxm = zeros(N, 1);               % Ã¿¸ö¸öÌåµÄÀúÊ·×î¼ÑÊÊÓ¦¶È
-fym = inf;                       % ÖÖÈºÀúÊ·×î¼ÑÊÊÓ¦¶È
-%% Á£×ÓÈº¹¤×÷
+x = round(x);                    % round the position of the initial population
+v = rand(N, d);                  % The velocity of the initial population
+xm = x;                          % pbest
+ym = zeros(1, d);                % gbest
+fxm = zeros(N, 1);               % f(pbest)
+fym = inf;                       % f(gbest)
+%% pevcs
 iter = 1;
 times = 1;
 record = zeros(ger, 1);          
 record_syd = 0;
 while iter <= ger 
     c_1 = Wmax-(Wmax-Wmin)*(iter/ger)^2;
-    syd = [];     %Ã¿Ò»¸öÁ£×ÓµÄÊÊÓ¦¶ÈÖµ
-    for i=1:N     %NÎªÖÖÈº¸öÊı
+    syd = [];     % The fitness value of each particle
+    for i=1:N     
         DX=x(i,:);
-        T=Car_Fitness(DX,N,EV_arrive_time,EV_charging_time);    %µ÷ÓÃº¯Êı£¬¼ÆËãÊÊÓ¦¶ÈÖµ
+        T=Car_Fitness(DX,N,EV_arrive_time,EV_charging_time);    % Call the function to calculate the fitness value
         syd=[syd,T];
     end
-    fx = syd;                       % µ±Ç°´úÊı£¬N¸öÁ£×ÓµÄÊÊÓ¦¶ÈÖµ   
-    %µ±iter=1µÄÊ±ºò£¬Òª½«Õâ¸öfxmºÍxm³õÊ¼»¯£¬Ö±½Ó¸³Öµ¸øËüÃÇ
+    fx = syd;                       % fx is the current iteration 
+    % When iter=1, initialize fxm and xm
     if iter ==1
-        for i = 1:N                 % N = 150 ÖÖÈº¸öÊı
+        for i = 1:N                
             if fxm(i) < fx(i)
-                fxm(i) = fx(i);     % ¸üĞÂ¸öÌåÀúÊ·×î¼ÑÊÊÓ¦¶È
-                xm(i,:) = x(i,:);   % ¸üĞÂ¸öÌåÀúÊ·×î¼ÑÎ»ÖÃ
+                fxm(i) = fx(i);     % update f(pbest)
+                xm(i,:) = x(i,:);   % update pbest
             end
         end
-        %µ±iter>1µÄÊ±ºò£¬Ôò½øĞĞµ±Ç°fxºÍfxm¡¢xm½øĞĞ±È½Ï½»»»µÄ²Ù×÷
+        % When iter>1, compare fx with fxm and xm
     else
-        for i = 1:N                % N = 150 ÖÖÈº¸öÊı
+        for i = 1:N                
             if fxm(i) > fx(i)
-                fxm(i) = fx(i);    % ¸üĞÂ¸öÌåÀúÊ·×î¼ÑÊÊÓ¦¶È
-                xm(i,:) = x(i,:);  % ¸üĞÂ¸öÌåÀúÊ·×î¼ÑÎ»ÖÃ
+                fxm(i) = fx(i);    % update f(pbest)
+                xm(i,:) = x(i,:);  % update pbest
             end
         end
     end 
-    if fym > min(fxm)              %fymµÄ³õÊ¼Öµ=inf
-        [fym, nmax] = min(fxm);    % ¸üĞÂÈºÌåÀúÊ·×î¼ÑÊÊÓ¦¶È
-        ym = xm(nmax, :);          % ¸üĞÂÈºÌåÀúÊ·×î¼ÑÎ»ÖÃ
+    if fym > min(fxm)              % Initial fym = inf
+        [fym, nmax] = min(fxm);    % update f(gbest)
+        ym = xm(nmax, :);          % update gbest
     end   
-    v =  c_1*v  + c_2 * rand *(xm - x) + c_3 * rand *(repmat(ym, N, 1) - x);% ËÙ¶È¸üĞÂ   
-    % ±ß½çËÙ¶È´¦Àí
+    v =  c_1*v  + c_2 * rand *(xm - x) + c_3 * rand *(repmat(ym, N, 1) - x); % update velocity  
+    % Boundary Velocity 
     for i=1:d
         for j=1:N
             if  v(j,i)>vlimit(i,2)
@@ -75,9 +75,9 @@ while iter <= ger
         end
     end
     v = round(v);
-    % Î»ÖÃ¸üĞÂ
+    % update location
     x = x + v;
-    % ±ß½çÎ»ÖÃ´¦Àí
+    % Boundary location
     for i=1:d
         for j=1:N
             if  x(j,i)>xlimit(i,2)
@@ -88,19 +88,19 @@ while iter <= ger
             end
         end
     end  
-    record(iter) = fym;            %×îĞ¡Öµ¼ÇÂ¼
+    record(iter) = fym;            
     iter = iter+1;
     times=times+1;
 end
 toc;
 
-%% ½á¹ûÊä³ö
+%% conclusion
 % figure(1)
 % plot(record,'Linewidth',1.5);
 % xlabel('Number of iterations','Linewidth',1.5) ;
 % ylabel('Fitness value','Linewidth',1.5) ;
-% % title('ÊÊÓ¦¶È½ø»¯ÇúÏß');
+% % title('é€‚åº”åº¦è¿›åŒ–æ›²çº¿');
 % 
-% disp(['×îĞ¡ºÄÊ±£º',num2str(fym)]);
-% disp(['³µÁ¾µ÷¶È½á¹û£º',num2str(ym)]);
+% disp(['æœ€å°è€—æ—¶ï¼š',num2str(fym)]);
+% disp(['è½¦è¾†è°ƒåº¦ç»“æœï¼š',num2str(ym)]);
 end
